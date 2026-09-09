@@ -60,6 +60,7 @@ class CurveNetwork {
         if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'none';
         this.connStatus.innerText = "🤖 PARTITA SINGOLA (VS BOT AI)";
         this.enableSoloAI();
+        this.engine.allowStart();
         this.engine.startCountdown();
       };
     }
@@ -166,6 +167,7 @@ class CurveNetwork {
             this.btnStartGame.style.display = 'none';
             if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'none';
             this.send({ type: 'START_MATCH' });
+            this.engine.allowStart();
             this.engine.startCountdown();
           };
         }
@@ -207,10 +209,12 @@ class CurveNetwork {
     } else if (data.type === 'START_MATCH') {
       if (!this.isHost) {
         if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'none';
+        this.engine.allowStart();
         this.engine.startCountdown();
       }
     } else if (data.type === 'START_ROUND') {
       if (!this.isHost) {
+        this.engine.allowStart();
         this.engine.startCountdown();
       }
     } else if (data.type === 'ROUND_SYNC') {
@@ -227,6 +231,7 @@ class CurveNetwork {
       this.engine.scores = { p1: 0, p2: 0 };
       this.updateScoreboard(this.engine.scores);
       document.getElementById('matchWinnerModal').style.display = 'none';
+      this.engine.allowStart();
       this.engine.startCountdown();
     } else if (data.type === 'RESTART_REQ') {
       if (this.isHost) {

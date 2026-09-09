@@ -139,8 +139,16 @@ class CurveGameEngine {
     this.onRoundEnd = null;
     this.onMatchEnd = null;
 
-    // Initialize players
+    // Hard guard: match cannot start without explicit user action or network trigger
+    this.canStart = false;
+
+    // Initialize players and draw initial idle board
     this.initPlayers();
+    this.render();
+  }
+
+  allowStart() {
+    this.canStart = true;
   }
 
   resize() {
@@ -153,6 +161,7 @@ class CurveGameEngine {
     this.canvas.height = h;
     this.width = w;
     this.height = h;
+    this.render();
   }
 
   initPlayers() {
@@ -199,6 +208,10 @@ class CurveGameEngine {
   }
 
   startCountdown() {
+    if (!this.canStart) {
+      console.warn("Blocked countdown: match has not been started by Host or Solo mode!");
+      return;
+    }
     this.isCountingDown = true;
     this.isRunning = false;
     this.countdownValue = 3;
