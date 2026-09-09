@@ -47,6 +47,28 @@
   <!-- Main Game Arena -->
   <main class="arena-wrapper">
     <canvas id="curveCanvas"></canvas>
+
+    <!-- Lobby / Waiting Overlay (Game does not start alone!) -->
+    <div class="lobby-overlay" id="lobbyOverlay">
+      <div class="lobby-box">
+        <div class="lobby-icon" id="lobbyIcon">⏳</div>
+        <h2 id="lobbyTitle">IN ATTESA DI TUA SORELLA...</h2>
+        <p id="lobbySubtitle">Invia il link per collegare i due smartphone</p>
+
+        <div class="lobby-actions" id="lobbyShareActions">
+          <button class="btn-lobby btn-lobby-wa" id="btnLobbyWA">📲 INVIA INVITO SU WHATSAPP</button>
+          <button class="btn-lobby btn-lobby-copy" id="btnLobbyCopy">📋 COPIA LINK INVITO</button>
+        </div>
+
+        <button class="btn-start-game" id="btnStartGame" style="display: none;">
+          ⚡ AVVIA IL DUELLO (INIZIA) ⚡
+        </button>
+
+        <div class="lobby-bot-opt" id="lobbyBotOpt">
+          <button class="btn-link-bot" id="btnSoloBot">🤖 Oppure allenati da solo contro il Bot AI</button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- Mobile Split Touch Controls (Full visibility on Samsung S26) -->
@@ -119,10 +141,9 @@
       btnRight.addEventListener('pointerup', endRight);
       btnRight.addEventListener('pointercancel', endRight);
 
-      // Start initial round
-      setTimeout(() => {
-        engine.startCountdown();
-      }, 400);
+      // Note: No automatic game start! The game only starts when:
+      // 1. Both players are connected and Host presses 'AVVIA IL DUELLO', or
+      // 2. The player explicitly clicks 'Oppure allenati da solo contro il Bot AI'.
     });
   </script>
 </body>
