@@ -1,4 +1,4 @@
-// === WEBRTC PEERJS & SOLO AI HARNESS ===
+// === WEBRTC PEERJS & MULTIPLAYER HARNESS ===
 
 class CurveNetwork {
   constructor(engine) {
@@ -9,11 +9,12 @@ class CurveNetwork {
     this.roomId = "";
     this.isConnected = false;
     this.isSoloAI = false;
-
-    this.aiTimer = 0;
+    this.retryTimer = null;
+    this.connectAttempts = 0;
 
     this.initDOM();
     this.setupRoom();
+    this.setupVisibilityListener();
   }
 
   initDOM() {
@@ -36,9 +37,15 @@ class CurveNetwork {
     this.btnLobbyWA = document.getElementById('btnLobbyWA');
     this.btnLobbyCopy = document.getElementById('btnLobbyCopy');
     this.btnStartGame = document.getElementById('btnStartGame');
-    this.lobbyBotOpt = document.getElementById('lobbyBotOpt');
     this.btnSoloBot = document.getElementById('btnSoloBot');
     this.lobbyRoomBadge = document.getElementById('lobbyRoomBadge');
+    this.lobbyNetState = document.getElementById('lobbyNetState');
+
+    // Live Player HUD elements in Lobby
+    this.lobbyNameP1 = document.getElementById('lobbyNameP1');
+    this.lobbyBadgeP1 = document.getElementById('lobbyBadgeP1');
+    this.lobbyNameP2 = document.getElementById('lobbyNameP2');
+    this.lobbyBadgeP2 = document.getElementById('lobbyBadgeP2');
 
     // Attach round/match hooks to engine
     this.engine.onRoundEnd = (winner, scores) => {
@@ -71,117 +78,148 @@ class CurveNetwork {
     const params = new URLSearchParams(window.location.search);
     const roomParam = params.get('room');
 
-    if (roomParam) {
-      this.isHost = false;
-      this.roomId = roomParam.toUpperCase();
-      this.nameP1.innerText = "TU";
-      this.nameP1.style.color = "#ff0077";
-      this.nameP2.innerText = "HOST";
-      this.nameP2.style.color = "#00f0ff";
-    } else {
+    if (!roomParam) {
+      // Creator of the room -> definitely Host
       this.isHost = true;
       this.roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-      this.nameP1.innerText = "TU";
-      this.nameP1.style.color = "#00f0ff";
-      this.nameP2.innerText = "SORELLA";
-      this.nameP2.style.color = "#ff0077";
+      try {
+        sessionStorage.setItem('cb_role_' + this.roomId, 'host');
+      } catch(e) {}
+      window.history.replaceState({}, '', `?room=${this.roomId}`);
+    } else {
+      this.roomId = roomParam.toUpperCase();
+      const savedRole = sessionStorage.getItem('cb_role_' + this.roomId);
+      this.isHost = (savedRole === 'host');
+    }
+
+    if (this.isHost) {
+      if (this.nameP1) this.nameP1.innerText = "TU";
+      if (this.nameP2) this.nameP2.innerText = "SORELLA";
+      if (this.lobbyNameP1) this.lobbyNameP1.innerText = "TU (CYAN)";
+      if (this.lobbyNameP2) this.lobbyNameP2.innerText = "SORELLA (MAGENTA)";
+    } else {
+      if (this.nameP1) this.nameP1.innerText = "TU";
+      if (this.nameP2) this.nameP2.innerText = "HOST";
+      if (this.lobbyNameP1) this.lobbyNameP1.innerText = "HOST (CYAN)";
+      if (this.lobbyNameP2) this.lobbyNameP2.innerText = "TU (MAGENTA)";
     }
 
     if (this.roomBadge) this.roomBadge.innerText = this.roomId;
     if (this.lobbyRoomBadge) this.lobbyRoomBadge.innerText = this.roomId;
     this.setupShareButtons();
+    this.initPeer();
+  }
 
-    // Start PeerJS connection
+  initPeer() {
     const myId = this.isHost
       ? `curve-${this.roomId}-host`
-      : `curve-${this.roomId}-guest-${Date.now().toString().slice(-4)}`;
+      : `curve-${this.roomId}-guest-${Math.random().toString(36).substring(2, 6)}`;
 
     this.peer = new Peer(myId, {
+      debug: 1,
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' },
+          { urls: 'stun:stun.cloudflare.com:3478' }
         ]
       }
     });
 
-    this.peer.on('open', () => {
+    this.peer.on('open', (id) => {
+      console.log(`[P2P] Peer registered as: ${id}`);
+      if (this.lobbyNetState) this.lobbyNetState.innerText = "SEGNALAZIONE ONLINE";
+
       if (this.isHost) {
         if (this.connStatus) this.connStatus.innerText = "ATTESA";
-        if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'flex';
-        if (this.lobbyTitle) this.lobbyTitle.innerText = "IN ATTESA DI TUA SORELLA";
-        if (this.lobbySubtitle) this.lobbySubtitle.innerText = "Invia il link per collegare i due smartphone in tempo reale";
-        if (this.lobbyShareActions) this.lobbyShareActions.style.display = 'flex';
-        if (this.btnStartGame) this.btnStartGame.style.display = 'none';
+        this.updateLobbyWaitingState();
       } else {
         if (this.connStatus) this.connStatus.innerText = "CONNESSIONE...";
-        if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'flex';
-        if (this.lobbyIcon) this.lobbyIcon.innerText = "📡";
-        if (this.lobbyTitle) this.lobbyTitle.innerText = "CONNESSIONE ALL'HOST...";
-        if (this.lobbySubtitle) this.lobbySubtitle.innerText = `Collegamento alla stanza ${this.roomId}...`;
-        if (this.lobbyShareActions) this.lobbyShareActions.style.display = 'none';
-        if (this.btnStartGame) this.btnStartGame.style.display = 'none';
-        if (this.lobbyBotOpt) this.lobbyBotOpt.style.display = 'none';
         this.connectToHost();
       }
     });
 
     this.peer.on('connection', (c) => {
+      console.log("[P2P] Incoming connection received on Host!");
       this.conn = c;
       this.setupDataChannel();
     });
 
     this.peer.on('error', (err) => {
-      console.warn("P2P Signaling note:", err.type);
-      if (!this.isConnected) {
-        if (this.connStatus) this.connStatus.innerText = "STANDBY";
+      console.warn("[P2P] Peer error:", err.type, err);
+      if (err.type === 'peer-unavailable') {
+        if (!this.isConnected && !this.isHost) {
+          if (this.lobbySubtitle) {
+            this.lobbySubtitle.innerText = `In attesa che l'Host sia online... (riprovo in automatico)`;
+          }
+          if (this.retryTimer) clearTimeout(this.retryTimer);
+          this.retryTimer = setTimeout(() => {
+            if (!this.isConnected && !this.isHost) {
+              this.connectToHost();
+            }
+          }, 2200);
+        }
+      } else if (err.type === 'unavailable-id') {
+        console.warn("[P2P] ID conflict, retrying after broker cleanup...");
+        setTimeout(() => this.initPeer(), 1500);
       }
     });
   }
 
   connectToHost() {
+    if (this.isConnected || this.isHost) return;
     const hostId = `curve-${this.roomId}-host`;
-    this.conn = this.peer.connect(hostId, { reliable: false }); // Low-latency UDP
-    this.setupDataChannel();
+    this.connectAttempts++;
+    console.log(`[P2P] Connecting to Host (${hostId}), attempt ${this.connectAttempts}...`);
+
+    if (this.lobbyBadgeP2) {
+      this.lobbyBadgeP2.innerText = `COLLEGAMENTO (${this.connectAttempts})...`;
+      this.lobbyBadgeP2.className = "lobby-player-badge badge-waiting";
+    }
+
+    try {
+      if (this.conn) {
+        try { this.conn.close(); } catch(e){}
+      }
+      this.conn = this.peer.connect(hostId, { reliable: true });
+      this.setupDataChannel();
+    } catch(err) {
+      console.warn("[P2P] connectToHost failed:", err);
+    }
+
+    // Schedule retry if not open within 3 seconds
+    if (this.retryTimer) clearTimeout(this.retryTimer);
+    this.retryTimer = setTimeout(() => {
+      if (!this.isConnected && !this.isHost) {
+        this.connectToHost();
+      }
+    }, 3000);
   }
 
   setupDataChannel() {
+    if (!this.conn) return;
+
     this.conn.on('open', () => {
+      console.log("[P2P] DataChannel OPEN and synchronized!");
       this.isConnected = true;
-      this.isSoloAI = false; // Disable AI when real player arrives
+      this.isSoloAI = false;
+      if (this.retryTimer) clearTimeout(this.retryTimer);
+
       if (this.connDot) this.connDot.classList.add('connected');
       if (this.connStatus) this.connStatus.innerText = "1v1 ONLINE";
-      this.nameP2.innerText = this.isHost ? "SORELLA" : "HOST";
+
+      // Vibrate & Sound feedback
+      if (navigator.vibrate) {
+        try { navigator.vibrate([100, 60, 100]); } catch(e){}
+      }
       this.engine.sound.playWin();
 
-      if (this.isHost) {
-        // Host sees the big AVVIA button to start when ready
-        if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'flex';
-        if (this.lobbyIcon) this.lobbyIcon.innerText = "⚡";
-        if (this.lobbyTitle) this.lobbyTitle.innerText = "TUA SORELLA È CONNESSA!";
-        if (this.lobbySubtitle) this.lobbySubtitle.innerText = "Entrambi i telefoni sono sincronizzati! Clicca per iniziare il duello:";
-        if (this.lobbyShareActions) this.lobbyShareActions.style.display = 'none';
-        if (this.lobbyBotOpt) this.lobbyBotOpt.style.display = 'none';
-        if (this.btnStartGame) {
-          this.btnStartGame.style.display = 'block';
-          this.btnStartGame.onclick = () => {
-            this.btnStartGame.style.display = 'none';
-            if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'none';
-            this.send({ type: 'START_MATCH' });
-            this.engine.allowStart();
-            this.engine.startCountdown();
-          };
-        }
-      } else {
-        // Guest waits for Host to launch
-        if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'flex';
-        if (this.lobbyIcon) this.lobbyIcon.innerText = "🎮";
-        if (this.lobbyTitle) this.lobbyTitle.innerText = "CONNESSO ALL'HOST!";
-        if (this.lobbySubtitle) this.lobbySubtitle.innerText = "In attesa che l'Host prema 'AVVIA IL DUELLO' per iniziare...";
-        if (this.lobbyShareActions) this.lobbyShareActions.style.display = 'none';
-        if (this.btnStartGame) this.btnStartGame.style.display = 'none';
-        if (this.lobbyBotOpt) this.lobbyBotOpt.style.display = 'none';
-      }
+      // Send handshake ping
+      this.send({ type: 'HANDSHAKE', isHost: this.isHost });
+
+      // Show Connected State on both phones
+      this.showConnectedLobby();
     });
 
     this.conn.on('data', (data) => {
@@ -189,9 +227,77 @@ class CurveNetwork {
     });
 
     this.conn.on('close', () => {
+      console.warn("[P2P] DataChannel closed!");
       this.isConnected = false;
       if (this.connDot) this.connDot.classList.remove('connected');
       if (this.connStatus) this.connStatus.innerText = "DISCONNESSO";
+      this.updateLobbyWaitingState();
+    });
+
+    this.conn.on('error', (err) => {
+      console.warn("[P2P] DataChannel error:", err);
+    });
+  }
+
+  updateLobbyWaitingState() {
+    if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'flex';
+    if (this.lobbyIcon) this.lobbyIcon.innerText = "⏳";
+    if (this.lobbyTitle) this.lobbyTitle.innerText = "IN ATTESA DI TUA SORELLA";
+    if (this.lobbySubtitle) this.lobbySubtitle.innerText = "Invia il link per collegare i due smartphone in tempo reale";
+    if (this.lobbyShareActions) this.lobbyShareActions.style.display = 'flex';
+    if (this.btnStartGame) this.btnStartGame.style.display = 'none';
+
+    if (this.lobbyBadgeP1) {
+      this.lobbyBadgeP1.innerText = "PRONTO ✓";
+      this.lobbyBadgeP1.className = "lobby-player-badge badge-ready";
+    }
+    if (this.lobbyBadgeP2) {
+      this.lobbyBadgeP2.innerText = "IN ATTESA ⏳";
+      this.lobbyBadgeP2.className = "lobby-player-badge badge-waiting";
+    }
+  }
+
+  showConnectedLobby() {
+    if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'flex';
+    if (this.lobbyIcon) this.lobbyIcon.innerText = "⚡";
+    if (this.lobbyTitle) this.lobbyTitle.innerText = "TUA SORELLA È CONNESSA!";
+    if (this.lobbySubtitle) this.lobbySubtitle.innerText = "Entrambi i telefoni sono sincronizzati. Clicca per dare il via al duello:";
+    if (this.lobbyShareActions) this.lobbyShareActions.style.display = 'none';
+
+    // Update player badges to both READY!
+    if (this.lobbyBadgeP1) {
+      this.lobbyBadgeP1.innerText = "PRONTO ✓";
+      this.lobbyBadgeP1.className = "lobby-player-badge badge-ready";
+    }
+    if (this.lobbyBadgeP2) {
+      this.lobbyBadgeP2.innerText = "CONNESSA ✓";
+      this.lobbyBadgeP2.className = "lobby-player-badge badge-ready";
+    }
+
+    // Start button visible and clickable on BOTH phones!
+    if (this.btnStartGame) {
+      this.btnStartGame.style.display = 'block';
+      this.btnStartGame.onclick = () => {
+        this.btnStartGame.style.display = 'none';
+        if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'none';
+        this.send({ type: 'START_MATCH' });
+        this.engine.allowStart();
+        this.engine.startCountdown();
+      };
+    }
+  }
+
+  setupVisibilityListener() {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        console.log("[P2P] Tab restored to foreground!");
+        if (this.peer && this.peer.disconnected && !this.peer.destroyed) {
+          try { this.peer.reconnect(); } catch(e){}
+        }
+        if (!this.isConnected && !this.isHost) {
+          this.connectToHost();
+        }
+      }
     });
   }
 
@@ -207,12 +313,14 @@ class CurveNetwork {
       if (this.isHost) {
         this.engine.inputP2 = data.steer;
       }
+    } else if (data.type === 'HANDSHAKE') {
+      console.log("[P2P] Handshake received from peer!");
+      this.showConnectedLobby();
     } else if (data.type === 'START_MATCH') {
-      if (!this.isHost) {
-        if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'none';
-        this.engine.allowStart();
-        this.engine.startCountdown();
-      }
+      console.log("[P2P] Match launch command received!");
+      if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'none';
+      this.engine.allowStart();
+      this.engine.startCountdown();
     } else if (data.type === 'START_ROUND') {
       if (!this.isHost) {
         this.engine.allowStart();
@@ -231,7 +339,8 @@ class CurveNetwork {
     } else if (data.type === 'RESTART_MATCH') {
       this.engine.scores = { p1: 0, p2: 0 };
       this.updateScoreboard(this.engine.scores);
-      document.getElementById('matchWinnerModal').style.display = 'none';
+      const modal = document.getElementById('matchWinnerModal');
+      if (modal) modal.style.display = 'none';
       this.engine.allowStart();
       this.engine.startCountdown();
     } else if (data.type === 'RESTART_REQ') {

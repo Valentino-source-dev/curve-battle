@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>CURVE BATTLE 1 VS 1 | DUALLO A SCIA LASER</title>
-  <link rel="stylesheet" href="css/style.css?v=20260909_2315">
+  <link rel="stylesheet" href="css/style.css?v=20260909_2325">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
@@ -57,13 +57,32 @@
   <main class="arena-wrapper">
     <canvas id="curveCanvas"></canvas>
 
-    <!-- Lobby / Waiting Overlay (Game does not start alone!) -->
+    <!-- Lobby / Waiting Overlay -->
     <div class="lobby-overlay" id="lobbyOverlay">
       <div class="lobby-box">
         <div class="lobby-icon" id="lobbyIcon">⏳</div>
         <h2 id="lobbyTitle">IN ATTESA DI TUA SORELLA</h2>
         <p id="lobbySubtitle">Invia il link per collegare i due smartphone in tempo reale</p>
 
+        <!-- Live 2-Player Status HUD -->
+        <div class="lobby-players">
+          <div class="lobby-player-row">
+            <div class="lobby-player-info">
+              <span class="player-dot dot-cyan"></span>
+              <span id="lobbyNameP1">TU (CYAN)</span>
+            </div>
+            <span class="lobby-player-badge badge-ready" id="lobbyBadgeP1">PRONTO ✓</span>
+          </div>
+          <div class="lobby-player-row">
+            <div class="lobby-player-info">
+              <span class="player-dot dot-magenta"></span>
+              <span id="lobbyNameP2">SORELLA (MAGENTA)</span>
+            </div>
+            <span class="lobby-player-badge badge-waiting" id="lobbyBadgeP2">IN ATTESA ⏳</span>
+          </div>
+        </div>
+
+        <!-- Share Actions -->
         <div class="lobby-actions" id="lobbyShareActions">
           <button class="btn-lobby btn-lobby-wa" id="btnLobbyWA">
             <span class="btn-lobby-icon">📲</span>
@@ -73,20 +92,21 @@
             <span class="btn-lobby-icon">📋</span>
             <span>COPIA LINK DI SFIDA</span>
           </button>
+          <button class="btn-lobby btn-lobby-bot" id="btnSoloBot">
+            <span class="btn-lobby-icon">🤖</span>
+            <span>GIOCA SUBITO (VS BOT AI)</span>
+          </button>
         </div>
 
+        <!-- Start 1v1 Button (Illuminates when both phones connect) -->
         <button class="btn-start-game" id="btnStartGame" style="display: none;">
-          ⚡ AVVIA IL DUELLO (INIZIA) ⚡
+          ⚡ AVVIA IL DUELLO 1v1 (INIZIA) ⚡
         </button>
-
-        <div class="lobby-bot-opt" id="lobbyBotOpt">
-          <button class="btn-link-bot" id="btnSoloBot">🤖 Oppure allenati da solo contro il Bot AI</button>
-        </div>
 
         <div class="lobby-footer-info">
           <span>Stanza: <strong id="lobbyRoomBadge">------</strong></span>
           <span>•</span>
-          <span>🔒 LOBBY V2.1</span>
+          <span id="lobbyNetState">P2P ATTIVO</span>
         </div>
       </div>
     </div>
@@ -119,8 +139,8 @@
     </div>
   </div>
 
-  <script src="js/game.js?v=20260909_2315"></script>
-  <script src="js/network.js?v=20260909_2315"></script>
+  <script src="js/game.js?v=20260909_2325"></script>
+  <script src="js/network.js?v=20260909_2325"></script>
   <script>
     let engine = null;
     let network = null;
