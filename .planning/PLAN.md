@@ -1,9 +1,8 @@
-# GSD Plan: Curve Battle (1 vs 1 P2P Tron Curve Game)
+# GSD Plan: Curve Battle Tuning & Mobile S26 Optimization
 
-**Status**: `COMPLETED` | **Mode**: 1v1 Mobile WebRTC Curve Lightcycle Standoff
+**Status**: `COMPLETED` | **Mode**: Speed -60% + 100dvh Samsung S26 Fix + Neon Yellow Buttons
 
 ## Phases
-- [x] **Phase 1: Game Physics & Curve Trail Engine (Gaps & Collisions)** `[DONE]`
-- [x] **Phase 2: WebRTC P2P Networking & Solo Practice AI** `[DONE]`
-- [x] **Phase 3: Cyberpunk UI & Mobile Split Touch Controls** `[DONE]`
-- [x] **Phase 4: GitHub Repository & Pages Live Deployment** `[DONE]`
+- [x] **Phase 1: 60% Speed Reduction (Speed: 68, TurnSpeed: 2.3)** `[DONE]`
+- [x] **Phase 2: Samsung S26 Viewport Fix (100dvh & safe-area-inset)** `[DONE]`
+- [x] **Phase 3: Dual Neon Yellow Touch Buttons** `[DONE]`

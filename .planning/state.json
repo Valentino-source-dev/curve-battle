@@ -1,42 +1,33 @@
 {
-  "goal": "Build Curve Battle / Tron Lightcycles 1v1 mobile P2P WebRTC browser game with gap generation, touch controls, and solo AI mode",
-  "created_at": "2026-09-09T22:41:25Z",
-  "updated_at": "2026-09-09T22:42:35Z",
+  "goal": "Tuning: reduce curve speed by 60%, optimize responsive layout for Samsung S26 with full viewport 100dvh, and style steering buttons in neon yellow",
+  "created_at": "2026-09-09T22:45:45Z",
+  "updated_at": "2026-09-09T22:47:00Z",
   "status": "completed",
   "steps": [
     {
       "id": 1,
-      "name": "Game Physics & Curve Trail Engine",
-      "description": "Implement 60FPS 2D curve movement, periodic gap/hole generation, line collision math, particle explosion, and synth audio in js/game.js",
+      "name": "60% Speed Reduction",
+      "description": "Lower line speed from 165 to 68 px/s and turnSpeed to 2.3 for precision control",
       "target_files": ["js/game.js"],
-      "verification_cmd": "grep -q 'class CurveGameEngine' js/game.js",
+      "verification_cmd": "grep -q 'speed: 68' js/game.js",
       "status": "completed",
       "commit_hash": "pending"
     },
     {
       "id": 2,
-      "name": "WebRTC P2P Multiplayer & Solo AI",
-      "description": "Implement PeerJS room signaling, WhatsApp link sharing (?room=XYZ), input synchronization, and intelligent solo practice bot in js/network.js",
-      "target_files": ["js/network.js"],
-      "verification_cmd": "grep -q 'class CurveNetwork' js/network.js",
+      "name": "Samsung S26 Viewport Optimization",
+      "description": "Refactor to 100dvh flex layout with safe-area-inset padding so touch buttons are 100% visible and accessible",
+      "target_files": ["css/style.css", "index.html"],
+      "verification_cmd": "grep -q '100dvh' css/style.css",
       "status": "completed",
       "commit_hash": "pending"
     },
     {
       "id": 3,
-      "name": "Cyberpunk UI & Mobile Touch Controls",
-      "description": "Build responsive index.html with side-by-side touch steering zones, score board, neon glow CRT styling in css/style.css",
-      "target_files": ["index.html", "css/style.css"],
-      "verification_cmd": "test -f index.html && test -f css/style.css",
-      "status": "completed",
-      "commit_hash": "pending"
-    },
-    {
-      "id": 4,
-      "name": "GitHub Repo Creation & Pages Deployment",
-      "description": "Create GitHub repo Valentino-source-dev/curve-battle, commit all files, push, and enable GitHub Pages",
-      "target_files": ["."],
-      "verification_cmd": "git status --porcelain",
+      "name": "Neon Yellow Touch Buttons",
+      "description": "Style left and right touch zones in vibrant yellow with high-contrast black labels",
+      "target_files": ["css/style.css"],
+      "verification_cmd": "grep -q 'background: #ffcc00' css/style.css",
       "status": "completed",
       "commit_hash": "pending"
     }

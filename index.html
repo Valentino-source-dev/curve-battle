@@ -47,19 +47,19 @@
   <!-- Main Game Arena -->
   <main class="arena-wrapper">
     <canvas id="curveCanvas"></canvas>
-
-    <!-- Mobile Split Touch Controls -->
-    <div class="touch-controls-bar">
-      <div class="touch-btn touch-btn-left" id="btnTouchLeft">
-        <div class="touch-icon">↰</div>
-        <div class="touch-label">CURVA A SINISTRA (A)</div>
-      </div>
-      <div class="touch-btn touch-btn-right" id="btnTouchRight">
-        <div class="touch-icon">↱</div>
-        <div class="touch-label">CURVA A DESTRA (D)</div>
-      </div>
-    </div>
   </main>
+
+  <!-- Mobile Split Touch Controls (Full visibility on Samsung S26) -->
+  <div class="touch-controls-bar">
+    <div class="touch-btn" id="btnTouchLeft">
+      <div class="touch-icon">↰</div>
+      <div class="touch-label">CURVA A SINISTRA (A)</div>
+    </div>
+    <div class="touch-btn" id="btnTouchRight">
+      <div class="touch-icon">↱</div>
+      <div class="touch-label">CURVA A DESTRA (D)</div>
+    </div>
+  </div>
 
   <!-- Match Winner Modal -->
   <div class="modal-screen" id="matchWinnerModal">

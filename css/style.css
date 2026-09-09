@@ -4,8 +4,9 @@
   --magenta: #ff0077;
   --magenta-glow: rgba(255, 0, 119, 0.6);
   --gold: #ffcc00;
+  --gold-glow: rgba(255, 204, 0, 0.6);
   --dark-bg: #05050a;
-  --panel-bg: rgba(12, 12, 20, 0.95);
+  --panel-bg: rgba(12, 12, 20, 0.96);
   --font-display: 'Impact', 'Arial Black', sans-serif;
   --font-mono: 'Courier New', monospace;
 }
@@ -17,14 +18,19 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-body {
+html, body {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
   background-color: var(--dark-bg);
   color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   user-select: none;
 }
 
@@ -41,45 +47,46 @@ body {
   background-size: 100% 3px;
 }
 
-/* Header & Status Bar */
+/* Header & Status Bar (Compact for Mobile) */
 header {
+  height: 44px;
+  min-height: 44px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 16px;
+  padding: 4px 14px;
   background: var(--panel-bg);
   border-bottom: 2px solid rgba(0, 240, 255, 0.3);
   z-index: 10;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-shrink: 0;
 }
 
 .title-badge {
   font-family: var(--font-display);
-  font-size: 1.4rem;
-  letter-spacing: 2px;
+  font-size: 1.15rem;
+  letter-spacing: 1.5px;
   color: #fff;
-  text-shadow: 0 0 15px var(--cyan);
+  text-shadow: 0 0 12px var(--cyan);
 }
 
 .title-badge span {
   color: var(--magenta);
-  text-shadow: 0 0 15px var(--magenta);
+  text-shadow: 0 0 12px var(--magenta);
 }
 
 .room-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .room-id-chip {
   background: #151522;
   border: 1px solid var(--gold);
   color: var(--gold);
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: 4px;
   font-weight: bold;
 }
@@ -87,8 +94,8 @@ header {
 .conn-indicator {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.8rem;
+  gap: 5px;
+  font-size: 0.75rem;
   color: #aaa;
 }
 
@@ -109,8 +116,8 @@ header {
   background: #1a1a2e;
   border: 1px solid #444;
   color: #ddd;
-  font-size: 0.8rem;
-  padding: 5px 10px;
+  font-size: 0.75rem;
+  padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -128,30 +135,28 @@ header {
   font-weight: bold;
 }
 
-.btn-wa:hover {
-  background: #20ba5a;
-  color: #fff;
-}
-
-/* Scoreboard */
+/* Scoreboard (Compact) */
 .scoreboard {
+  height: 42px;
+  min-height: 42px;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 10px 16px;
+  padding: 2px 14px;
   background: rgba(8, 8, 14, 0.9);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
 }
 
 .player-box {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 8px;
 }
 
 .player-name {
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   letter-spacing: 1px;
 }
 
@@ -160,97 +165,95 @@ header {
 
 .player-score {
   font-family: var(--font-display);
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   line-height: 1;
 }
 
-.p1-score { color: var(--cyan); text-shadow: 0 0 20px var(--cyan-glow); }
-.p2-score { color: var(--magenta); text-shadow: 0 0 20px var(--magenta-glow); }
+.p1-score { color: var(--cyan); text-shadow: 0 0 15px var(--cyan-glow); }
+.p2-score { color: var(--magenta); text-shadow: 0 0 15px var(--magenta-glow); }
 
 .score-divider {
-  font-family: var(--font-display);
-  font-size: 1.3rem;
-  color: #555;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: #666;
+  letter-spacing: 1px;
 }
 
-/* Arena Container */
+/* Arena Container (Flex Grow to fill available height) */
 .arena-wrapper {
   flex: 1;
+  min-height: 0;
+  width: 100%;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 8px 12px;
+  padding: 4px 6px;
+  overflow: hidden;
   position: relative;
 }
 
 #curveCanvas {
   display: block;
-  max-width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
 }
 
-/* Mobile Split Touch Controls */
+/* Mobile Split Touch Controls (Samsung S26 / Mobile Optimized) */
 .touch-controls-bar {
+  flex-shrink: 0;
   display: flex;
   width: 100%;
-  max-width: 900px;
-  height: 95px;
-  gap: 12px;
-  padding: 8px 12px 14px;
+  height: 82px;
+  gap: 10px;
+  padding: 6px 10px calc(8px + env(safe-area-inset-bottom, 4px));
+  background: rgba(8, 8, 12, 0.95);
+  border-top: 1px solid rgba(255, 204, 0, 0.3);
 }
 
+/* Both Buttons are NEON YELLOW with black text */
 .touch-btn {
   flex: 1;
-  background: rgba(18, 18, 28, 0.9);
-  border: 2px solid #333;
-  color: #fff;
-  border-radius: 10px;
+  background: #ffcc00;
+  border: 2px solid #ffffff;
+  color: #000000;
+  border-radius: 12px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
+  gap: 8px;
   cursor: pointer;
   touch-action: none;
   transition: all 0.08s ease;
   user-select: none;
+  box-shadow: 0 4px 15px rgba(255, 204, 0, 0.4);
 }
 
-.touch-btn-left {
-  border-color: var(--cyan);
-}
-
-.touch-btn-left:active, .touch-btn-left.active {
-  background: var(--cyan);
-  color: #000;
-  box-shadow: 0 0 30px var(--cyan-glow);
-  transform: scale(0.96);
-}
-
-.touch-btn-right {
-  border-color: var(--magenta);
-}
-
-.touch-btn-right:active, .touch-btn-right.active {
-  background: var(--magenta);
-  color: #000;
-  box-shadow: 0 0 30px var(--magenta-glow);
+.touch-btn:active, .touch-btn.active {
+  background: #ffe580;
+  color: #000000;
+  box-shadow: 0 0 30px #ffcc00;
   transform: scale(0.96);
 }
 
 .touch-icon {
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   font-weight: 900;
+  color: #000000;
 }
 
 .touch-label {
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: 1.05rem;
+  font-weight: 900;
   letter-spacing: 1px;
+  color: #000000;
 }
 
-/* Modal */
+/* Modal Screen */
 .modal-screen {
   position: fixed;
   top: 0;
@@ -271,21 +274,21 @@ header {
   background: var(--panel-bg);
   border: 3px solid var(--cyan);
   border-radius: 12px;
-  padding: 35px 25px;
-  max-width: 440px;
+  padding: 30px 20px;
+  max-width: 400px;
   box-shadow: 0 0 50px rgba(0, 240, 255, 0.3);
 }
 
 .modal-box h2 {
   font-family: var(--font-display);
-  font-size: 2.2rem;
-  margin-bottom: 12px;
+  font-size: 2rem;
+  margin-bottom: 10px;
 }
 
 .modal-box p {
   color: #ccc;
-  margin-bottom: 25px;
-  font-size: 1.05rem;
+  margin-bottom: 20px;
+  font-size: 1rem;
 }
 
 .btn-big {
@@ -293,8 +296,8 @@ header {
   color: #000;
   border: none;
   font-family: var(--font-display);
-  font-size: 1.2rem;
-  padding: 12px 28px;
+  font-size: 1.15rem;
+  padding: 12px 26px;
   border-radius: 6px;
   cursor: pointer;
   transition: transform 0.2s ease;

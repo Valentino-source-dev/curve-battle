@@ -145,8 +145,10 @@ class CurveGameEngine {
 
   resize() {
     const container = this.canvas.parentElement;
-    const w = Math.min(container.clientWidth || 800, 900);
-    const h = Math.min(window.innerHeight * 0.65, 580);
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const w = Math.floor(rect.width) || 360;
+    const h = Math.floor(rect.height) || 400;
     this.canvas.width = w;
     this.canvas.height = h;
     this.width = w;
@@ -163,14 +165,14 @@ class CurveGameEngine {
         x: this.width * 0.25,
         y: this.height * 0.5,
         angle: 0, // Facing right
-        speed: 165,
-        turnSpeed: 3.6,
+        speed: 68, // Reduced by 60% as requested
+        turnSpeed: 2.3,
         radius: 3,
         alive: true,
         // Gap generation
         gapTimer: 0,
         gapInterval: Math.random() * 2.0 + 2.5,
-        gapDuration: 0.25,
+        gapDuration: 0.35,
         isGapping: false,
         recentPoints: []
       },
@@ -182,14 +184,14 @@ class CurveGameEngine {
         x: this.width * 0.75,
         y: this.height * 0.5,
         angle: Math.PI, // Facing left
-        speed: 165,
-        turnSpeed: 3.6,
+        speed: 68, // Reduced by 60% as requested
+        turnSpeed: 2.3,
         radius: 3,
         alive: true,
         // Gap generation
         gapTimer: 0,
         gapInterval: Math.random() * 2.0 + 2.5,
-        gapDuration: 0.25,
+        gapDuration: 0.35,
         isGapping: false,
         recentPoints: []
       }
