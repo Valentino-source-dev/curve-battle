@@ -38,6 +38,7 @@ class CurveNetwork {
     this.btnStartGame = document.getElementById('btnStartGame');
     this.lobbyBotOpt = document.getElementById('lobbyBotOpt');
     this.btnSoloBot = document.getElementById('btnSoloBot');
+    this.lobbyRoomBadge = document.getElementById('lobbyRoomBadge');
 
     // Attach round/match hooks to engine
     this.engine.onRoundEnd = (winner, scores) => {
@@ -58,7 +59,7 @@ class CurveNetwork {
     if (this.btnSoloBot) {
       this.btnSoloBot.onclick = () => {
         if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'none';
-        this.connStatus.innerText = "🤖 PARTITA SINGOLA (VS BOT AI)";
+        if (this.connStatus) this.connStatus.innerText = "VS BOT";
         this.enableSoloAI();
         this.engine.allowStart();
         this.engine.startCountdown();
@@ -73,20 +74,21 @@ class CurveNetwork {
     if (roomParam) {
       this.isHost = false;
       this.roomId = roomParam.toUpperCase();
-      this.nameP1.innerText = "TU (MAGENTA)";
+      this.nameP1.innerText = "TU";
       this.nameP1.style.color = "#ff0077";
-      this.nameP2.innerText = "HOST (CYAN)";
+      this.nameP2.innerText = "HOST";
       this.nameP2.style.color = "#00f0ff";
     } else {
       this.isHost = true;
       this.roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-      this.nameP1.innerText = "TU (CYAN)";
+      this.nameP1.innerText = "TU";
       this.nameP1.style.color = "#00f0ff";
       this.nameP2.innerText = "SORELLA";
       this.nameP2.style.color = "#ff0077";
     }
 
-    this.roomBadge.innerText = this.roomId;
+    if (this.roomBadge) this.roomBadge.innerText = this.roomId;
+    if (this.lobbyRoomBadge) this.lobbyRoomBadge.innerText = this.roomId;
     this.setupShareButtons();
 
     // Start PeerJS connection
@@ -105,18 +107,17 @@ class CurveNetwork {
 
     this.peer.on('open', () => {
       if (this.isHost) {
-        this.connStatus.innerText = "IN ATTESA DI TUA SORELLA...";
+        if (this.connStatus) this.connStatus.innerText = "ATTESA";
         if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'flex';
-        if (this.lobbyTitle) this.lobbyTitle.innerText = "IN ATTESA DI TUA SORELLA...";
-        if (this.lobbySubtitle) this.lobbySubtitle.innerText = "Condividi il link o WhatsApp per sfidarla 1 vs 1";
+        if (this.lobbyTitle) this.lobbyTitle.innerText = "IN ATTESA DI TUA SORELLA";
+        if (this.lobbySubtitle) this.lobbySubtitle.innerText = "Invia il link per collegare i due smartphone in tempo reale";
         if (this.lobbyShareActions) this.lobbyShareActions.style.display = 'flex';
         if (this.btnStartGame) this.btnStartGame.style.display = 'none';
-        // Note: No automatic bot start or countdown! Game waits for 2nd player or explicit bot click.
       } else {
-        this.connStatus.innerText = "CONNESSIONE ALL'HOST...";
+        if (this.connStatus) this.connStatus.innerText = "CONNESSIONE...";
         if (this.lobbyOverlay) this.lobbyOverlay.style.display = 'flex';
         if (this.lobbyIcon) this.lobbyIcon.innerText = "📡";
-        if (this.lobbyTitle) this.lobbyTitle.innerText = "CONNESSIONE ALL'HOST IN CORSO...";
+        if (this.lobbyTitle) this.lobbyTitle.innerText = "CONNESSIONE ALL'HOST...";
         if (this.lobbySubtitle) this.lobbySubtitle.innerText = `Collegamento alla stanza ${this.roomId}...`;
         if (this.lobbyShareActions) this.lobbyShareActions.style.display = 'none';
         if (this.btnStartGame) this.btnStartGame.style.display = 'none';
@@ -133,7 +134,7 @@ class CurveNetwork {
     this.peer.on('error', (err) => {
       console.warn("P2P Signaling note:", err.type);
       if (!this.isConnected) {
-        this.connStatus.innerText = "STANZA PRONTA (IN ATTESA DI CONNESSIONE)";
+        if (this.connStatus) this.connStatus.innerText = "STANDBY";
       }
     });
   }
@@ -148,9 +149,9 @@ class CurveNetwork {
     this.conn.on('open', () => {
       this.isConnected = true;
       this.isSoloAI = false; // Disable AI when real player arrives
-      this.connDot.classList.add('connected');
-      this.connStatus.innerText = "🟢 ENTRAMBI COLLEGATI!";
-      this.nameP2.innerText = this.isHost ? "SORELLA (MAGENTA)" : "HOST (CYAN)";
+      if (this.connDot) this.connDot.classList.add('connected');
+      if (this.connStatus) this.connStatus.innerText = "1v1 ONLINE";
+      this.nameP2.innerText = this.isHost ? "SORELLA" : "HOST";
       this.engine.sound.playWin();
 
       if (this.isHost) {
@@ -189,8 +190,8 @@ class CurveNetwork {
 
     this.conn.on('close', () => {
       this.isConnected = false;
-      this.connDot.classList.remove('connected');
-      this.connStatus.innerText = "🔴 GIOCATORE DISCONNESSO";
+      if (this.connDot) this.connDot.classList.remove('connected');
+      if (this.connStatus) this.connStatus.innerText = "DISCONNESSO";
     });
   }
 

@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>CURVE BATTLE 1 VS 1 | DUALLO A SCIA LASER</title>
-  <link rel="stylesheet" href="css/style.css?v=20260909_2300">
+  <link rel="stylesheet" href="css/style.css?v=20260909_2315">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
@@ -17,33 +17,39 @@
 
   <!-- Header -->
   <header>
-    <div class="title-badge">CURVE <span>BATTLE</span> 1v1</div>
-
-    <div class="room-bar">
-      <span>STANZA:</span>
-      <span class="room-id-chip" id="roomBadge">------</span>
-      <button class="btn-sm btn-wa" id="btnShareWA">📲 WHATSAPP</button>
-      <button class="btn-sm" id="btnCopyLink">📋 LINK</button>
+    <div class="brand">
+      <span class="brand-bolt">⚡</span>
+      <span class="brand-title">CURVE<span class="brand-accent">BATTLE</span></span>
     </div>
 
-    <div class="conn-indicator">
-      <span class="conn-dot" id="connDot"></span>
-      <span id="connStatus">AVVIO RETE P2P...</span>
+    <div class="header-status">
+      <div class="room-chip" id="btnCopyLink" title="Tocca per copiare il link">
+        <span class="room-tag">STANZA</span>
+        <span class="room-code" id="roomBadge">------</span>
+      </div>
+      <div class="conn-chip">
+        <span class="conn-dot" id="connDot"></span>
+        <span class="conn-text" id="connStatus">ATTESA</span>
+      </div>
     </div>
   </header>
 
   <!-- Scoreboard -->
   <div class="scoreboard">
-    <div class="player-box">
-      <div class="player-name p1-name" id="nameP1">CYAN</div>
-      <div class="player-score p1-score" id="scoreP1">0</div>
+    <div class="score-card card-p1">
+      <span class="player-dot dot-cyan"></span>
+      <span class="player-name p1-name" id="nameP1">CYAN</span>
+      <span class="player-score p1-score" id="scoreP1">0</span>
     </div>
 
-    <div class="score-divider">PRIMA A 5 VITTORIE</div>
+    <div class="score-target">
+      <span class="target-badge">PRIMA A 5</span>
+    </div>
 
-    <div class="player-box">
-      <div class="player-name p2-name" id="nameP2">MAGENTA</div>
-      <div class="player-score p2-score" id="scoreP2">0</div>
+    <div class="score-card card-p2">
+      <span class="player-score p2-score" id="scoreP2">0</span>
+      <span class="player-name p2-name" id="nameP2">MAGENTA</span>
+      <span class="player-dot dot-magenta"></span>
     </div>
   </div>
 
@@ -55,12 +61,18 @@
     <div class="lobby-overlay" id="lobbyOverlay">
       <div class="lobby-box">
         <div class="lobby-icon" id="lobbyIcon">⏳</div>
-        <h2 id="lobbyTitle">IN ATTESA DI TUA SORELLA...</h2>
-        <p id="lobbySubtitle">Invia il link per collegare i due smartphone</p>
+        <h2 id="lobbyTitle">IN ATTESA DI TUA SORELLA</h2>
+        <p id="lobbySubtitle">Invia il link per collegare i due smartphone in tempo reale</p>
 
         <div class="lobby-actions" id="lobbyShareActions">
-          <button class="btn-lobby btn-lobby-wa" id="btnLobbyWA">📲 INVIA INVITO SU WHATSAPP</button>
-          <button class="btn-lobby btn-lobby-copy" id="btnLobbyCopy">📋 COPIA LINK INVITO</button>
+          <button class="btn-lobby btn-lobby-wa" id="btnLobbyWA">
+            <span class="btn-lobby-icon">📲</span>
+            <span>INVITA SU WHATSAPP</span>
+          </button>
+          <button class="btn-lobby btn-lobby-copy" id="btnLobbyCopy">
+            <span class="btn-lobby-icon">📋</span>
+            <span>COPIA LINK DI SFIDA</span>
+          </button>
         </div>
 
         <button class="btn-start-game" id="btnStartGame" style="display: none;">
@@ -70,8 +82,11 @@
         <div class="lobby-bot-opt" id="lobbyBotOpt">
           <button class="btn-link-bot" id="btnSoloBot">🤖 Oppure allenati da solo contro il Bot AI</button>
         </div>
-        <div style="font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 8px; font-family: monospace;">
-          🔒 LOBBY V2.0 • ATTESA AVVIO MANUALE
+
+        <div class="lobby-footer-info">
+          <span>Stanza: <strong id="lobbyRoomBadge">------</strong></span>
+          <span>•</span>
+          <span>🔒 LOBBY V2.1</span>
         </div>
       </div>
     </div>
@@ -80,12 +95,18 @@
   <!-- Mobile Split Touch Controls (Full visibility on Samsung S26) -->
   <div class="touch-controls-bar">
     <div class="touch-btn" id="btnTouchLeft">
-      <div class="touch-icon">↰</div>
-      <div class="touch-label">CURVA A SINISTRA (A)</div>
+      <span class="touch-icon">↰</span>
+      <div class="touch-info">
+        <span class="touch-main">SINISTRA</span>
+        <span class="touch-key">(A)</span>
+      </div>
     </div>
     <div class="touch-btn" id="btnTouchRight">
-      <div class="touch-icon">↱</div>
-      <div class="touch-label">CURVA A DESTRA (D)</div>
+      <div class="touch-info">
+        <span class="touch-main">DESTRA</span>
+        <span class="touch-key">(D)</span>
+      </div>
+      <span class="touch-icon">↱</span>
     </div>
   </div>
 
@@ -98,8 +119,8 @@
     </div>
   </div>
 
-  <script src="js/game.js?v=20260909_2300"></script>
-  <script src="js/network.js?v=20260909_2300"></script>
+  <script src="js/game.js?v=20260909_2315"></script>
+  <script src="js/network.js?v=20260909_2315"></script>
   <script>
     let engine = null;
     let network = null;
