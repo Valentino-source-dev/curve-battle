@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CURVE BATTLE 1 VS 1 | DUALLO A SCIA LASER</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+
+  <div class="crt-overlay"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="title-badge">CURVE <span>BATTLE</span> 1v1</div>
+
+    <div class="room-bar">
+      <span>STANZA:</span>
+      <span class="room-id-chip" id="roomBadge">------</span>
+      <button class="btn-sm btn-wa" id="btnShareWA">📲 WHATSAPP</button>
+      <button class="btn-sm" id="btnCopyLink">📋 LINK</button>
+    </div>
+
+    <div class="conn-indicator">
+      <span class="conn-dot" id="connDot"></span>
+      <span id="connStatus">AVVIO RETE P2P...</span>
+    </div>
+  </header>
+
+  <!-- Scoreboard -->
+  <div class="scoreboard">
+    <div class="player-box">
+      <div class="player-name p1-name" id="nameP1">CYAN</div>
+      <div class="player-score p1-score" id="scoreP1">0</div>
+    </div>
+
+    <div class="score-divider">PRIMA A 5 VITTORIE</div>
+
+    <div class="player-box">
+      <div class="player-name p2-name" id="nameP2">MAGENTA</div>
+      <div class="player-score p2-score" id="scoreP2">0</div>
+    </div>
+  </div>
+
+  <!-- Main Game Arena -->
+  <main class="arena-wrapper">
+    <canvas id="curveCanvas"></canvas>
+
+    <!-- Mobile Split Touch Controls -->
+    <div class="touch-controls-bar">
+      <div class="touch-btn touch-btn-left" id="btnTouchLeft">
+        <div class="touch-icon">↰</div>
+        <div class="touch-label">CURVA A SINISTRA (A)</div>
+      </div>
+      <div class="touch-btn touch-btn-right" id="btnTouchRight">
+        <div class="touch-icon">↱</div>
+        <div class="touch-label">CURVA A DESTRA (D)</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Match Winner Modal -->
+  <div class="modal-screen" id="matchWinnerModal">
+    <div class="modal-box">
+      <h2 id="winnerTitle">🏆 VITTORIA! 🏆</h2>
+      <p id="winnerDesc">Hai conquistato l'arena con 5 vittorie!</p>
+      <button class="btn-big" onclick="network.resetMatch()">🔄 RIGIOCA LA SFIDA</button>
+    </div>
+  </div>
+
+  <script src="js/game.js"></script>
+  <script src="js/network.js"></script>
+  <script>
+    let engine = null;
+    let network = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      engine = new CurveGameEngine('curveCanvas');
+      network = new CurveNetwork(engine);
+
+      // Keyboard Controls (A/D or Arrows)
+      window.addEventListener('keydown', (e) => {
+        const key = e.key.toLowerCase();
+        if (key === 'a' || key === 'arrowleft') {
+          network.sendLocalInput(-1);
+          document.getElementById('btnTouchLeft').classList.add('active');
+        } else if (key === 'd' || key === 'arrowright') {
+          network.sendLocalInput(1);
+          document.getElementById('btnTouchRight').classList.add('active');
+        }
+      });
+
+      window.addEventListener('keyup', (e) => {
+        const key = e.key.toLowerCase();
+        if (key === 'a' || key === 'arrowleft' || key === 'd' || key === 'arrowright') {
+          network.sendLocalInput(0);
+          document.getElementById('btnTouchLeft').classList.remove('active');
+          document.getElementById('btnTouchRight').classList.remove('active');
+        }
+      });
+
+      // Mobile Touch Handlers
+      const btnLeft = document.getElementById('btnTouchLeft');
+      const btnRight = document.getElementById('btnTouchRight');
+
+      const startLeft = (e) => { e.preventDefault(); network.sendLocalInput(-1); btnLeft.classList.add('active'); };
+      const endLeft = (e) => { e.preventDefault(); network.sendLocalInput(0); btnLeft.classList.remove('active'); };
+
+      const startRight = (e) => { e.preventDefault(); network.sendLocalInput(1); btnRight.classList.add('active'); };
+      const endRight = (e) => { e.preventDefault(); network.sendLocalInput(0); btnRight.classList.remove('active'); };
+
+      btnLeft.addEventListener('pointerdown', startLeft);
+      btnLeft.addEventListener('pointerup', endLeft);
+      btnLeft.addEventListener('pointercancel', endLeft);
+
+      btnRight.addEventListener('pointerdown', startRight);
+      btnRight.addEventListener('pointerup', endRight);
+      btnRight.addEventListener('pointercancel', endRight);
+
+      // Start initial round
+      setTimeout(() => {
+        engine.startCountdown();
+      }, 400);
+    });
+  </script>
+</body>
+</html>
